@@ -1,39 +1,88 @@
-import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Upload, LineChart, FileText } from "lucide-react";
+import {
+  LayoutDashboard,
+  Upload,
+  BarChart3,
+  FileText,
+  Database,
+  ShieldCheck
+} from "lucide-react";
+
+import { Link } from "react-router-dom";
 
 function Sidebar() {
-  const location = useLocation();
-
-  const menu = [
-    { path: "/dashboard", name: "Dashboard", icon: <BarChart3 size={18} /> },
-    { path: "/upload", name: "Dataset Upload", icon: <Upload size={18} /> },
-    { path: "/forecast", name: "Forecast", icon: <LineChart size={18} /> },
-    { path: "/reports", name: "Reports", icon: <FileText size={18} /> },
-  ];
 
   return (
-    <aside className="w-64 bg-[#123f1f] text-white min-h-screen p-6">
-      <h1 className="text-2xl font-bold mb-10 text-[#b7ff5a]">
-        AI Forecast
-      </h1>
 
-      <nav className="space-y-3">
-        {menu.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-              location.pathname === item.path
-                ? "bg-[#8ee000] text-[#123f1f] font-bold"
-                : "hover:bg-[#1f5f32]"
-            }`}
-          >
-            {item.icon}
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <div className="w-72 min-h-screen bg-white border-r border-green-200 shadow-md">
+
+      {/* Logo */}
+      <div className="p-8 border-b border-green-200">
+
+        <h1 className="text-2xl font-bold text-[#123f1f]">
+          AI Forecast
+        </h1>
+
+        <p className="text-sm text-gray-500 mt-2">
+          Analytics Platform
+        </p>
+
+      </div>
+
+      {/* Navigation */}
+      <div className="p-5 flex flex-col gap-3">
+
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <LayoutDashboard size={22} />
+          Dashboard
+        </Link>
+
+        <Link
+          to="/upload"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <Upload size={22} />
+          Upload Dataset
+        </Link>
+
+        <Link
+          to="/forecast"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <BarChart3 size={22} />
+          Forecast
+        </Link>
+
+        <Link
+          to="/datasets"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <Database size={22} />
+          Datasets
+        </Link>
+
+        <Link
+          to="/reports"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <FileText size={22} />
+          Reports
+        </Link>
+
+        <Link
+          to="/admin"
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        >
+          <ShieldCheck size={22} />
+          Admin
+        </Link>
+
+      </div>
+
+    </div>
+
   );
 }
 

@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import Forecast from "./pages/Forecast";
 import Reports from "./pages/Reports";
+import AdminDashboard from "./pages/AdminDashboard";
+import Datasets from "./pages/Datasets";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
@@ -56,6 +58,28 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Reports />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/datasets"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Datasets />
               </Layout>
             </ProtectedRoute>
           }

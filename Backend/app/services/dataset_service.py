@@ -1,31 +1,124 @@
+import os
+import pandas as pd
+
 from fastapi import HTTPException
-from app.ml.preprocessing import clean_uploaded_file
-from app.models.dataset import SalesData
+
+from app.models.dataset import SalesData, Dataset
+from app.services.notification_service import create_notification
+
+
+UPLOAD_DIR = "uploads"
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 def upload_dataset_service(file, db, user_id):
-    if not file.filename.endswith((".csv", ".xlsx")):
-        raise HTTPException(status_code=400, detail="Only CSV and Excel files allowed")
 
-    df, error = clean_uploaded_file(file)
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        file.filename
+    )
 
-    if error:
-        raise HTTPException(status_code=400, detail=error)
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
 
-    for _, row in df.iterrows():
-        sales = SalesData(
-            date=row["date"],
-            product_name=row["product_name"],
-            category=row["category"],
-            quantity_sold=row["quantity_sold"],
-            sales_amount=row["sales_amount"],
-            uploaded_by=user_id
+    try:
+        if file.filename.endswith(".csv"):
+            df = pd.read_csv(file_path)
+        elif file.filename.endswith(".xlsx"):
+            df = pd.read_excel(file_path)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Only CSV and Excel files are allowed"
+            )
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid dataset file"
         )
-        db.add(sales)
 
+    required_columns = [
+        "date",
+        "product_name",
+        "category",
+        "region",
+        "quantity_sold",
+        "sales_amount"
+    ]
+
+    for col in required_columns:
+        if col not in df.columns:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing column: {col}"
+            )
+
+    df = df.dropna(subset=[
+        "date",
+        "product_name",
+        "category",
+        "region",
+        "quantity_sold",
+        "sales_amount"
+    ])
+
+    if df.empty:
+        raise HTTPException(
+            status_code=400,
+            detail="Dataset file has no valid rows"
+        )
+
+    dataset = Dataset(
+        file_name=file.filename,
+        uploaded_by=user_id,
+        total_records=len(df),
+        status="uploaded"
+    )
+
+    db.add(dataset)
     db.commit()
+    db.refresh(dataset)
 
-    return {
-        "message": "Dataset uploaded successfully",
-        "records_inserted": len(df)
-    }
+    inserted_count = 0
+
+    try:
+        for _, row in df.iterrows():
+
+            sales = SalesData(
+                dataset_id=dataset.id,
+                date=pd.to_datetime(row["date"]).date(),
+                product_name=str(row["product_name"]),
+                category=str(row["category"]),
+                region=str(row["region"]),
+                quantity_sold=int(float(row["quantity_sold"])),
+                sales_amount=float(row["sales_amount"]),
+                uploaded_by=user_id
+            )
+
+            db.add(sales)
+            inserted_count += 1
+
+        db.commit()
+
+        create_notification(
+            db=db,
+            user_id=user_id,
+            message="Dataset uploaded successfully",
+            type="upload"
+        )
+
+        return {
+            "success": True,
+            "message": "Dataset uploaded successfully",
+            "dataset_id": dataset.id,
+            "records_inserted": inserted_count
+        }
+
+    except Exception as e:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Dataset upload failed: {str(e)}"
+        )

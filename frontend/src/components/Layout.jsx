@@ -1,18 +1,29 @@
 import Sidebar from "./Sidebar";
+
 import Navbar from "./Navbar";
 
 function Layout({ children }) {
+
   return (
-    <div className="flex min-h-screen bg-[#f4fff0]">
+
+    <div className="flex bg-[#f7fff0] min-h-screen">
+
       <Sidebar />
 
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
+
         <Navbar />
-        <main className="p-6 min-h-screen bg-gradient-to-br from-white via-[#f4fff0] to-[#d9ffcc]">
+
+        <div className="p-8">
+
           {children}
-        </main>
+
+        </div>
+
       </div>
+
     </div>
+
   );
 }
 
