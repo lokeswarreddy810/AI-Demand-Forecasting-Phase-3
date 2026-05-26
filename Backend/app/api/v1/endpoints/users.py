@@ -1,10 +1,21 @@
-from fastapi import APIRouter, Depends
-from app.core.dependencies import get_current_user
-from app.services.user_service import get_profile
+from fastapi import APIRouter
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter()
 
+@router.get("/")
+def get_users():
 
-@router.get("/me")
-def get_me(current_user=Depends(get_current_user)):
-    return get_profile(current_user)
+    return [
+        {
+            "id": 1,
+            "name": "Admin User",
+            "email": "admin@gmail.com",
+            "role": "Super Admin"
+        },
+        {
+            "id": 2,
+            "name": "Analyst User",
+            "email": "analyst@gmail.com",
+            "role": "Analyst"
+        }
+    ]

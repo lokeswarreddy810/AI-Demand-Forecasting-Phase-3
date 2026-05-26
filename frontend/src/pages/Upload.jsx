@@ -3,58 +3,113 @@ import API from "../api/axiosConfig";
 
 function Upload() {
   const [file, setFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const uploadDataset = async (e) => {
-    e.preventDefault();
-
+  const handleUpload = async () => {
     if (!file) {
-      alert("Please select CSV or Excel file");
+      setMessage("Please select a file");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await API.post("/dataset/upload", formData);
-      alert(response.data.message);
-    } catch {
-      alert("Upload failed");
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await API.post(
+        "/datasets/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setMessage(
+        response.data.message ||
+          "Dataset uploaded successfully"
+      );
+
+    } catch (error) {
+      console.log(
+        "Upload Error:",
+        error.response?.data || error.message
+      );
+
+      setMessage(
+        error.response?.data?.detail ||
+          "Dataset upload failed"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <h1 className="text-3xl font-bold mb-6 text-[#123f1f]">
-        Dataset Upload
+    <div>
+
+      <h1 className="text-4xl font-bold text-[#123f1f] dark:text-white mb-8">
+        Upload Dataset
       </h1>
 
-      <div className="bg-white rounded-2xl shadow-md p-8 max-w-xl border border-green-200">
-        <form onSubmit={uploadDataset}>
-          <h2 className="text-xl font-bold mb-4 text-[#123f1f]">
-            Upload Historical Sales Dataset
-          </h2>
+      <p className="text-gray-600 dark:text-gray-300 mb-8">
+        Required columns:
+        {" "}
+        date,
+        product_name,
+        category,
+        region,
+        quantity_sold,
+        sales_amount
+      </p>
+
+      <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-2xl shadow-md border border-green-200 max-w-3xl">
+
+        <div className="border-2 border-dashed border-green-300 rounded-2xl p-10 text-center">
 
           <input
             type="file"
-            accept=".csv,.xlsx"
-            className="block w-full border border-green-300 p-3 rounded-xl mb-6"
+            accept=".xlsx,.xls,.csv"
             onChange={(e) => setFile(e.target.files[0])}
+            className="mb-6"
           />
 
-          <button className="bg-[#8ee000] text-[#123f1f] font-bold px-6 py-3 rounded-xl hover:bg-[#7ed900]">
-            Upload Dataset
-          </button>
-        </form>
+          <div>
+
+            <button
+              onClick={handleUpload}
+              disabled={loading}
+              className="bg-[#9dff00] hover:bg-[#b7ff39] text-[#032b11] font-bold px-8 py-4 rounded-2xl transition-all duration-200"
+            >
+
+              {loading
+                ? "Uploading..."
+                : "Upload Dataset"}
+
+            </button>
+
+          </div>
+
+        </div>
+
+        {message && (
+
+          <div className="mt-8 bg-[#f5fff0] dark:bg-[#2a2a2a] border border-green-200 rounded-2xl p-5">
+
+            <p className="text-[#123f1f] dark:text-white font-medium">
+              {message}
+            </p>
+
+          </div>
+
+        )}
+
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md p-6 max-w-xl mt-6 border border-green-200">
-        <h2 className="font-bold mb-2 text-[#123f1f]">Required Columns</h2>
-        <p className="text-gray-600">
-          date, product_name, category, quantity_sold, sales_amount
-        </p>
-      </div>
-    </>
+    </div>
   );
 }
 

@@ -1,150 +1,149 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import date
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
 from app.models.dataset import SalesData
-from app.services.analytics_service import (
-    get_summary,
-    get_monthly_sales,
-    get_top_products
-)
 
-router = APIRouter(prefix="/analytics", tags=["Analytics"])
+router = APIRouter()
 
 
 @router.get("/summary")
-def summary(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    return get_summary(db, current_user.id)
+def get_summary(db: Session = Depends(get_db)):
+    total_sales = db.query(func.sum(SalesData.sales_amount)).scalar() or 0
+    total_quantity = db.query(func.sum(SalesData.quantity_sold)).scalar() or 0
+    total_products = db.query(
+        func.count(func.distinct(SalesData.product_name))
+    ).scalar() or 0
+
+    return {
+        "total_sales": round(total_sales, 2),
+        "total_quantity": total_quantity,
+        "total_products": total_products,
+    }
 
 
 @router.get("/monthly-sales")
-def monthly_sales(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    return get_monthly_sales(db, current_user.id)
+def monthly_sales(db: Session = Depends(get_db)):
+    data = db.query(
+        SalesData.date,
+        func.sum(SalesData.sales_amount).label("total_sales"),
+    ).group_by(SalesData.date).all()
+
+    return [
+        {
+            "month": str(item[0]),
+            "total_sales": round(item[1] or 0, 2),
+        }
+        for item in data
+    ]
 
 
 @router.get("/top-products")
-def top_products(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    return get_top_products(db, current_user.id)
+def top_products(db: Session = Depends(get_db)):
+    data = db.query(
+        SalesData.product_name,
+        func.sum(SalesData.sales_amount).label("total_sales"),
+    ).group_by(SalesData.product_name).all()
+
+    return [
+        {
+            "product_name": item[0],
+            "total_sales": round(item[1] or 0, 2),
+        }
+        for item in data
+    ]
 
 
 @router.get("/category-sales")
-def category_sales(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
+def category_sales(db: Session = Depends(get_db)):
     data = db.query(
         SalesData.category,
         func.sum(SalesData.sales_amount).label("total_sales"),
-        func.sum(SalesData.quantity_sold).label("total_quantity")
-    ).filter(
-        SalesData.uploaded_by == current_user.id
     ).group_by(SalesData.category).all()
 
     return [
         {
-            "category": row.category,
-            "total_sales": row.total_sales,
-            "total_quantity": row.total_quantity
+            "category": item[0],
+            "total_sales": round(item[1] or 0, 2),
         }
-        for row in data
+        for item in data
     ]
 
 
 @router.get("/region-sales")
-def region_sales(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
+def region_sales(db: Session = Depends(get_db)):
     data = db.query(
         SalesData.region,
         func.sum(SalesData.sales_amount).label("total_sales"),
-        func.sum(SalesData.quantity_sold).label("total_quantity")
-    ).filter(
-        SalesData.uploaded_by == current_user.id
     ).group_by(SalesData.region).all()
 
     return [
         {
-            "region": row.region,
-            "total_sales": row.total_sales,
-            "total_quantity": row.total_quantity
+            "region": item[0],
+            "total_sales": round(item[1] or 0, 2),
         }
-        for row in data
+        for item in data
     ]
 
 
-@router.get("/date-range")
-def date_range_analytics(
-    start_date: date = Query(...),
-    end_date: date = Query(...),
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    if start_date > end_date:
-        return {
-            "success": False,
-            "message": "start_date cannot be greater than end_date"
-        }
-
+@router.get("/revenue-prediction")
+def revenue_prediction(db: Session = Depends(get_db)):
     data = db.query(
-        func.sum(SalesData.sales_amount).label("total_sales"),
-        func.sum(SalesData.quantity_sold).label("total_quantity"),
-        func.count(SalesData.id).label("total_records")
-    ).filter(
-        SalesData.uploaded_by == current_user.id,
-        SalesData.date >= start_date,
-        SalesData.date <= end_date
-    ).first()
+        SalesData.product_name,
+        func.avg(SalesData.sales_amount).label("avg_sales"),
+        func.avg(SalesData.quantity_sold).label("avg_quantity"),
+    ).group_by(SalesData.product_name).all()
 
-    return {
-        "success": True,
-        "start_date": start_date,
-        "end_date": end_date,
-        "total_sales": data.total_sales or 0,
-        "total_quantity": data.total_quantity or 0,
-        "total_records": data.total_records or 0
-    }
+    result = []
+
+    for product, avg_sales, avg_quantity in data:
+        avg_sales = float(avg_sales or 0)
+        avg_quantity = float(avg_quantity or 0)
+
+        predicted_quantity = avg_quantity + 10
+        predicted_revenue = predicted_quantity * (
+            avg_sales / avg_quantity if avg_quantity > 0 else 0
+        )
+
+        result.append(
+            {
+                "product_name": product,
+                "predicted_quantity": round(predicted_quantity, 2),
+                "predicted_revenue": round(predicted_revenue, 2),
+            }
+        )
+
+    return result
 
 
-@router.get("/filter")
-def filter_analytics(
-    category: str | None = None,
-    region: str | None = None,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    query = db.query(SalesData).filter(
-        SalesData.uploaded_by == current_user.id
-    )
+@router.get("/inventory-risk")
+def inventory_risk(db: Session = Depends(get_db)):
+    data = db.query(
+        SalesData.product_name,
+        func.avg(SalesData.quantity_sold).label("avg_quantity"),
+    ).group_by(SalesData.product_name).all()
 
-    if category:
-        query = query.filter(SalesData.category.ilike(f"%{category}%"))
+    result = []
 
-    if region:
-        query = query.filter(SalesData.region.ilike(f"%{region}%"))
+    for product, avg_quantity in data:
+        avg_quantity = float(avg_quantity or 0)
 
-    total_sales = query.with_entities(
-        func.sum(SalesData.sales_amount)
-    ).scalar()
+        if avg_quantity >= 100:
+            risk = "High Demand - Restock Required"
+        elif avg_quantity >= 50:
+            risk = "Medium Risk - Maintain Stock"
+        elif avg_quantity >= 20:
+            risk = "Low Risk - Safe Inventory"
+        else:
+            risk = "Overstock Risk - Low Demand"
 
-    total_quantity = query.with_entities(
-        func.sum(SalesData.quantity_sold)
-    ).scalar()
+        result.append(
+            {
+                "product_name": product,
+                "average_quantity": round(avg_quantity, 2),
+                "inventory_risk": risk,
+            }
+        )
 
-    return {
-        "success": True,
-        "total_sales": total_sales or 0,
-        "total_quantity": total_quantity or 0
-    }
+    return result

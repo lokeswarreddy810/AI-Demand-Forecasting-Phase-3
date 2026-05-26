@@ -1,95 +1,92 @@
-import { useState } from "react";
+import { Bell, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { Bell } from "lucide-react";
+import API from "../api/axiosConfig";
 
-import { useNavigate } from "react-router-dom";
+function Navbar({ darkMode, setDarkMode }) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
-function Navbar() {
+  const loadNotifications = async () => {
+    try {
+      const response = await API.get("/monitoring/logs");
 
-  const navigate = useNavigate();
+      const latestLogs = (response.data || [])
+        .slice(0, 5)
+        .map((log) => ({
+          message: log.activity,
+          time: new Date(log.timestamp).toLocaleString(),
+        }));
 
-  const [showNotifications, setShowNotifications] =
-    useState(false);
-
-  const logout = () => {
-
-    localStorage.removeItem("token");
-
-    navigate("/");
+      setNotifications(latestLogs);
+    } catch (error) {
+      console.log("Notification Error:", error.response?.data || error.message);
+    }
   };
 
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
   return (
+    <div className="h-20 bg-white dark:bg-[#1e1e1e] border-b border-green-200 dark:border-gray-700 flex items-center justify-between px-8 shadow-sm sticky top-0 z-40">
+      <h1 className="text-2xl font-bold text-[#123f1f] dark:text-white">
+        Advanced AI Demand Forecasting
+      </h1>
 
-    <div className="h-24 bg-white border-b border-green-200 flex items-center justify-between px-8 shadow-sm relative">
-
-      {/* Title */}
-      <div>
-
-        <h1 className="text-4xl font-bold text-[#123f1f]">
-          Advanced AI Demand Forecasting
-        </h1>
-
-      </div>
-
-      {/* Right Section */}
-      <div className="flex items-center gap-6 relative">
-
-        {/* Notification Bell */}
+      <div className="flex items-center gap-5 relative">
         <button
-          onClick={() =>
-            setShowNotifications(
-              !showNotifications
-            )
-          }
-          className="relative"
+          onClick={() => setDarkMode(!darkMode)}
+          className="bg-[#f5fff0] dark:bg-[#2a2a2a] p-3 rounded-full"
         >
-
-          <Bell
-            size={30}
-            className="text-[#123f1f]"
-          />
-
+          {darkMode ? (
+            <Sun className="text-yellow-400" size={22} />
+          ) : (
+            <Moon className="text-[#123f1f]" size={22} />
+          )}
         </button>
 
-        {/* Notification Dropdown */}
+        <button
+          onClick={() => setShowNotifications(!showNotifications)}
+          className="relative bg-[#f5fff0] dark:bg-[#2a2a2a] p-3 rounded-full"
+        >
+          <Bell className="text-[#123f1f] dark:text-white" size={22} />
+
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {notifications.length}
+            </span>
+          )}
+        </button>
+
         {showNotifications && (
-
-          <div className="absolute top-16 right-24 w-80 bg-white border border-green-200 rounded-2xl shadow-xl p-5 z-50">
-
-            <h2 className="text-2xl font-bold text-[#123f1f] mb-4">
+          <div className="absolute top-16 right-0 w-[350px] bg-white dark:bg-[#1e1e1e] border border-green-200 dark:border-gray-700 rounded-2xl shadow-xl p-5 z-50">
+            <h2 className="text-xl font-bold text-[#123f1f] dark:text-white mb-4">
               Notifications
             </h2>
 
-            <div className="space-y-3">
+            <div className="max-h-[400px] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="text-gray-500 text-center py-6">
+                  No notifications available
+                </div>
+              ) : (
+                notifications.map((item, index) => (
+                  <div key={index} className="border-b border-gray-100 py-3">
+                    <p className="font-medium text-[#123f1f] dark:text-white">
+                      {item.message}
+                    </p>
 
-              <div className="p-3 rounded-xl bg-[#f7fff0] border border-green-100">
-
-                Forecast generated successfully
-
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#f7fff0] border border-green-100">
-
-                Dataset uploaded successfully
-
-              </div>
-
+                    <p className="text-sm text-gray-500 mt-1">
+                      {item.time}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
-
           </div>
-
         )}
-
-        {/* Logout */}
-        <button
-          onClick={logout}
-          className="bg-[#7ed900] hover:bg-[#6ac400] text-[#123f1f] font-bold px-6 py-3 rounded-2xl"
-        >
-          Logout
-        </button>
-
       </div>
-
     </div>
   );
 }

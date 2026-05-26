@@ -1,10 +1,14 @@
 import os
 import pandas as pd
+import asyncio
 
 from fastapi import HTTPException
-
+from app.utils.activity_logger import log_activity
 from app.models.dataset import SalesData, Dataset
 from app.services.notification_service import create_notification
+from app.services.activity_log_service import create_activity_log
+from app.websocket.manager import manager
+from app.core.cache import clear_cache
 
 
 UPLOAD_DIR = "uploads"
@@ -108,6 +112,27 @@ def upload_dataset_service(file, db, user_id):
             type="upload"
         )
 
+        create_activity_log(
+            db=db,
+            user_id=user_id,
+            activity="Dataset Uploaded",
+            details=f"{inserted_count} records uploaded"
+        )
+
+        try:
+            asyncio.run(
+                manager.broadcast({
+                    "type": "dataset_upload",
+                    "message": "Dataset uploaded successfully",
+                    "records_inserted": inserted_count
+                    })
+                    )
+        except RuntimeError:
+            pass
+
+        clear_cache()
+        log_activity(db, user_id=user_id, activity="Dataset Uploaded")
+
         return {
             "success": True,
             "message": "Dataset uploaded successfully",
@@ -122,3 +147,4 @@ def upload_dataset_service(file, db, user_id):
             status_code=500,
             detail=f"Dataset upload failed: {str(e)}"
         )
+    

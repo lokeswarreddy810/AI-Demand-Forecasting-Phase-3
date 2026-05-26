@@ -1,403 +1,180 @@
 import { useEffect, useState } from "react";
-
 import API from "../api/axiosConfig";
 
-function Admin() {
-
-  const [analytics, setAnalytics] = useState({});
-
+function AdminDashboard() {
   const [users, setUsers] = useState([]);
-
   const [datasets, setDatasets] = useState([]);
-
-  const [activities, setActivities] = useState([]);
-
   const [reports, setReports] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [stats, setStats] = useState({});
 
-  useEffect(() => {
-
-    loadAdminData();
-
-  }, []);
+  const getArray = (res, key) => {
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.data?.[key])) return res.data[key];
+    if (Array.isArray(res.data?.data)) return res.data.data;
+    if (Array.isArray(res.data?.items)) return res.data.items;
+    return [];
+  };
 
   const loadAdminData = async () => {
-
     try {
-
-      const analyticsRes = await API.get(
-        "/admin/analytics"
+      const usersRes = await API.get("/admin/users");
+      const datasetsRes = await API.get("/datasets/");
+      const reportsRes = await API.post(
+        "/forecast/generate?days=7&model=linear_regression"
       );
+      const activitiesRes = await API.get("/monitoring/logs");
+      const statsRes = await API.get("/analytics/summary");
 
-      const usersRes = await API.get(
-        "/admin/users"
-      );
-
-      const datasetRes = await API.get(
-        "/admin/datasets"
-      );
-
-      const activitiesRes = await API.get(
-        "/admin/forecast-activities"
-      );
-
-      const reportsRes = await API.get(
-        "/admin/reports"
-      );
-
-      setAnalytics(analyticsRes.data);
-
-      setUsers(usersRes.data);
-
-      setDatasets(datasetRes.data);
-
-      setActivities(activitiesRes.data);
-
-      setReports(reportsRes.data);
-
+      setUsers(getArray(usersRes, "users"));
+      setDatasets(getArray(datasetsRes, "datasets"));
+      setReports(getArray(reportsRes, "forecast"));
+      setActivities(getArray(activitiesRes, "logs"));
+      setStats(statsRes.data || {});
     } catch (error) {
-
-      console.log(
-        "Admin Error:",
-        error.response?.data
-      );
+      console.log("Admin Error:", error.response?.data || error.message);
     }
   };
 
-  const disableUser = async (id) => {
-
-    await API.put(`/admin/user/${id}/disable`);
-
+  useEffect(() => {
     loadAdminData();
-  };
-
-  const enableUser = async (id) => {
-
-    await API.put(`/admin/user/${id}/enable`);
-
-    loadAdminData();
-  };
-
-  const deleteDataset = async (id) => {
-
-    await API.delete(`/admin/dataset/${id}`);
-
-    loadAdminData();
-  };
+  }, []);
 
   return (
-
     <div>
-
-      <div className="mb-10">
-
-        <h1 className="text-4xl font-bold text-[#123f1f]">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold text-[#123f1f] dark:text-white">
           Admin Dashboard
         </h1>
 
-        <p className="text-gray-500 mt-2">
-          Advanced AI Demand Forecasting Administration
-        </p>
-
+        <button
+          onClick={loadAdminData}
+          className="bg-[#9dff00] text-[#032b11] font-bold px-6 py-3 rounded-xl"
+        >
+          Refresh
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-10">
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-green-200">
-          <p className="text-gray-500">Total Users</p>
-          <h2 className="text-4xl font-bold text-[#123f1f] mt-2">
-            {analytics.total_users || 0}
-          </h2>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-green-200">
-          <p className="text-gray-500">Datasets</p>
-          <h2 className="text-4xl font-bold text-[#123f1f] mt-2">
-            {analytics.total_datasets || 0}
-          </h2>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-green-200">
-          <p className="text-gray-500">Forecasts</p>
-          <h2 className="text-4xl font-bold text-[#123f1f] mt-2">
-            {analytics.total_forecasts || 0}
-          </h2>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-green-200">
-          <p className="text-gray-500">Reports</p>
-          <h2 className="text-4xl font-bold text-[#123f1f] mt-2">
-            {analytics.total_reports || 0}
-          </h2>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-green-200">
-          <p className="text-gray-500">Activities</p>
-          <h2 className="text-4xl font-bold text-[#123f1f] mt-2">
-            {analytics.total_forecast_activities || 0}
-          </h2>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <Card title="Users" value={users.length} />
+        <Card title="Datasets" value={datasets.length} />
+        <Card title="Reports" value={reports.length} />
+        <Card title="Total Sales" value={`₹ ${stats.total_sales || 0}`} />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md p-8 border border-green-200 mb-10">
-
-        <h2 className="text-3xl font-bold text-[#123f1f] mb-6">
-          Manage Users
-        </h2>
-
-        <table className="w-full">
-
-          <thead>
-
-            <tr className="border-b border-green-200 text-left">
-
-              <th className="py-3">ID</th>
-
-              <th className="py-3">Email</th>
-
-              <th className="py-3">Role</th>
-
-              <th className="py-3">Actions</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {users.map((user) => (
-
-              <tr
-                key={user.id}
-                className="border-b border-gray-100"
-              >
-
-                <td className="py-4">
-                  {user.id}
-                </td>
-
-                <td className="py-4">
-                  {user.email}
-                </td>
-
-                <td className="py-4 capitalize">
-                  {user.role}
-                </td>
-
-                <td className="py-4 flex gap-3">
-
-                  <button
-                    onClick={() => enableUser(user.id)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Enable
-                  </button>
-
-                  <button
-                    onClick={() => disableUser(user.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Disable
-                  </button>
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-md p-8 border border-green-200 mb-10">
-
-        <h2 className="text-3xl font-bold text-[#123f1f] mb-6">
-          Manage Datasets
-        </h2>
-
-        <table className="w-full">
-
-          <thead>
-
-            <tr className="border-b border-green-200 text-left">
-
-              <th className="py-3">ID</th>
-
-              <th className="py-3">Product</th>
-
-              <th className="py-3">Region</th>
-
-              <th className="py-3">Sales</th>
-
-              <th className="py-3">Action</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {datasets.map((item) => (
-
-              <tr
-                key={item.id}
-                className="border-b border-gray-100"
-              >
-
-                <td className="py-4">
-                  {item.id}
-                </td>
-
-                <td className="py-4">
-                  {item.product_name}
-                </td>
-
-                <td className="py-4">
-                  {item.region}
-                </td>
-
-                <td className="py-4">
-                  ₹ {item.sales_amount}
-                </td>
-
-                <td className="py-4">
-
-                  <button
-                    onClick={() => deleteDataset(item.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Delete
-                  </button>
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-md p-8 border border-green-200 mb-10">
-
-        <h2 className="text-3xl font-bold text-[#123f1f] mb-6">
-          Forecast Activities
-        </h2>
-
-        <table className="w-full">
-
-          <thead>
-
-            <tr className="border-b border-green-200 text-left">
-
-              <th className="py-3">Product</th>
-
-              <th className="py-3">Model</th>
-
-              <th className="py-3">Accuracy</th>
-
-              <th className="py-3">Date</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {activities.map((item, index) => (
-
-              <tr
-                key={index}
-                className="border-b border-gray-100"
-              >
-
-                <td className="py-4">
-                  {item.product_name}
-                </td>
-
-                <td className="py-4">
-                  {item.model_used}
-                </td>
-
-                <td className="py-4">
-                  {item.accuracy}%
-                </td>
-
-                <td className="py-4">
-                  {item.forecast_date}
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-md p-8 border border-green-200">
-
-        <h2 className="text-3xl font-bold text-[#123f1f] mb-6">
-          Uploaded Reports
-        </h2>
-
-        <table className="w-full">
-
-          <thead>
-
-            <tr className="border-b border-green-200 text-left">
-
-              <th className="py-3">ID</th>
-
-              <th className="py-3">Report Name</th>
-
-              <th className="py-3">Created At</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {reports.map((item) => (
-
-              <tr
-                key={item.id}
-                className="border-b border-gray-100"
-              >
-
-                <td className="py-4">
-                  {item.id}
-                </td>
-
-                <td className="py-4">
-                  {item.report_name}
-                </td>
-
-                <td className="py-4">
-                  {item.created_at}
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
+      <Section title="Manage Users">
+        <Table
+          headers={["Name", "Email", "Role", "Status"]}
+          rows={users.map((u) => [
+            u.name || "N/A",
+            u.email || "N/A",
+            u.role || "Viewer",
+            u.is_active === false ? "Disabled" : "Active",
+          ])}
+        />
+      </Section>
+
+      <Section title="Manage Datasets">
+        <Table
+          headers={["Product", "Category", "Region", "Quantity", "Sales"]}
+          rows={datasets.map((d) => [
+            d.product_name || "N/A",
+            d.category || "N/A",
+            d.region || "N/A",
+            d.quantity_sold || 0,
+            `₹ ${d.sales_amount || 0}`,
+          ])}
+        />
+      </Section>
+
+      <Section title="Uploaded Reports">
+        <Table
+          headers={["Product", "Forecast Date", "Predicted Qty", "Revenue", "Model"]}
+          rows={reports.map((r) => [
+            r.product_name || "N/A",
+            r.forecast_date || "N/A",
+            r.predicted_quantity || 0,
+            `₹ ${r.predicted_revenue || 0}`,
+            r.model_used || "N/A",
+          ])}
+        />
+      </Section>
+
+      <Section title="Forecasting Activities">
+        <Table
+          headers={["User", "Activity", "Timestamp"]}
+          rows={activities.map((a) => [
+            a.username || "Unknown",
+            a.activity || "Activity",
+            a.timestamp ? new Date(a.timestamp).toLocaleString() : "N/A",
+          ])}
+        />
+      </Section>
     </div>
   );
 }
 
-export default Admin;
+function Card({ title, value }) {
+  return (
+    <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-md border border-green-200">
+      <p className="text-gray-500">{title}</p>
+      <h2 className="text-3xl font-bold text-[#123f1f] dark:text-white mt-3">
+        {value}
+      </h2>
+    </div>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-2xl shadow-md border border-green-200 mb-10">
+      <h2 className="text-2xl font-bold text-[#123f1f] dark:text-white mb-6">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function Table({ headers, rows }) {
+  return (
+    <div className="overflow-x-auto max-h-[350px] overflow-y-auto rounded-xl border border-green-200">
+      <table className="w-full min-w-[900px]">
+        <thead className="sticky top-0 bg-white dark:bg-[#1e1e1e] z-10">
+          <tr className="border-b border-green-200 text-left">
+            {headers.map((h) => (
+              <th key={h} className="py-3 px-3">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={headers.length}
+                className="text-center py-8 text-gray-500"
+              >
+                No data available
+              </td>
+            </tr>
+          ) : (
+            rows.map((row, index) => (
+              <tr key={index} className="border-b border-gray-100">
+                {row.map((cell, i) => (
+                  <td key={i} className="py-4 px-3">
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default AdminDashboard;

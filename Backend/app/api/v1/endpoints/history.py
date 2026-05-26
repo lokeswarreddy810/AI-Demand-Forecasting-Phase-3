@@ -7,10 +7,7 @@ from app.core.dependencies import get_current_user
 
 from app.models.forecast_history import ForecastHistory
 
-router = APIRouter(
-    prefix="/history",
-    tags=["Forecast History"]
-)
+router = APIRouter()
 
 
 @router.get("/")

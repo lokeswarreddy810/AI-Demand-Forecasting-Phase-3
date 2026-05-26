@@ -1,88 +1,126 @@
 import {
   LayoutDashboard,
   Upload,
-  BarChart3,
-  FileText,
+  LineChart,
   Database,
-  ShieldCheck
+  FileText,
+  Brain,
+  ShieldCheck,
+  Activity,
+  LogOut,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+    },
+    {
+      name: "Upload Dataset",
+      path: "/upload",
+      icon: <Upload size={20} />,
+    },
+    {
+      name: "Forecast",
+      path: "/forecast",
+      icon: <LineChart size={20} />,
+    },
+    {
+      name: "Datasets",
+      path: "/datasets",
+      icon: <Database size={20} />,
+    },
+    {
+      name: "Reports",
+      path: "/reports",
+      icon: <FileText size={20} />,
+    },
+    {
+      name: "AI Optimization",
+      path: "/ai-optimization",
+      icon: <Brain size={20} />,
+    },
+    {
+      name: "Admin",
+      path: "/admin",
+      icon: <ShieldCheck size={20} />,
+    },
+    {
+      name: "Monitoring",
+      path: "/monitoring",
+      icon: <Activity size={20} />,
+    },
+  ];
 
   return (
+    <div className="fixed left-0 top-0 h-screen w-72 bg-[#032b11] text-white flex flex-col justify-between shadow-xl">
 
-    <div className="w-72 min-h-screen bg-white border-r border-green-200 shadow-md">
+      <div>
 
-      {/* Logo */}
-      <div className="p-8 border-b border-green-200">
+        <div className="h-20 flex items-center px-8 border-b border-green-900">
+          <h1 className="text-4xl font-bold text-[#9dff00]">
+            AI Forecast
+          </h1>
+        </div>
 
-        <h1 className="text-2xl font-bold text-[#123f1f]">
-          AI Forecast
-        </h1>
+        <div className="mt-8 flex flex-col gap-3 px-4">
 
-        <p className="text-sm text-gray-500 mt-2">
-          Analytics Platform
-        </p>
+          {menuItems.map((item) => (
+
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 font-medium
+                ${
+                  isActive
+                    ? "bg-[#9dff00] text-[#032b11] shadow-lg"
+                    : "hover:bg-[#0d4420] text-white"
+                }`
+              }
+            >
+
+              {item.icon}
+
+              <span className="text-lg">
+                {item.name}
+              </span>
+
+            </NavLink>
+
+          ))}
+
+        </div>
 
       </div>
 
-      {/* Navigation */}
-      <div className="p-5 flex flex-col gap-3">
+      <div className="p-4">
 
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
+        <button
+          onClick={logout}
+          className="w-full bg-[#9dff00] hover:bg-[#b7ff39] text-[#032b11] font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-200"
         >
-          <LayoutDashboard size={22} />
-          Dashboard
-        </Link>
 
-        <Link
-          to="/upload"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
-        >
-          <Upload size={22} />
-          Upload Dataset
-        </Link>
+          <LogOut size={20} />
 
-        <Link
-          to="/forecast"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
-        >
-          <BarChart3 size={22} />
-          Forecast
-        </Link>
+          Logout
 
-        <Link
-          to="/datasets"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
-        >
-          <Database size={22} />
-          Datasets
-        </Link>
-
-        <Link
-          to="/reports"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
-        >
-          <FileText size={22} />
-          Reports
-        </Link>
-
-        <Link
-          to="/admin"
-          className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3ffe2] text-[#123f1f] font-semibold transition"
-        >
-          <ShieldCheck size={22} />
-          Admin
-        </Link>
+        </button>
 
       </div>
 
     </div>
-
   );
 }
 

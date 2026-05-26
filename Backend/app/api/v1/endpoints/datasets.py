@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
+import pandas as pd
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.dataset import SalesData
-from app.services.dataset_service import upload_dataset_service
+from app.utils.activity_logger import log_activity
 
-router = APIRouter(prefix="/dataset", tags=["Dataset"])
+router = APIRouter()
 
 
 @router.post("/upload")
@@ -15,66 +16,111 @@ def upload_dataset(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    if not file.filename.endswith((".csv", ".xlsx")):
-        raise HTTPException(
-            status_code=400,
-            detail="Only CSV and Excel files are allowed"
+    try:
+        if file.filename.endswith(".csv"):
+            df = pd.read_csv(file.file)
+        elif file.filename.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(file.file)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Only CSV or Excel files are allowed"
+            )
+
+        required_columns = [
+            "date",
+            "product_name",
+            "category",
+            "region",
+            "quantity_sold",
+            "sales_amount"
+        ]
+
+        for col in required_columns:
+            if col not in df.columns:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Missing column: {col}"
+                )
+
+        for _, row in df.iterrows():
+            data = SalesData(
+                date=row["date"],
+                product_name=row["product_name"],
+                category=row["category"],
+                region=row["region"],
+                quantity_sold=int(row["quantity_sold"]),
+                sales_amount=float(row["sales_amount"]),
+                uploaded_by=current_user.id
+            )
+
+            db.add(data)
+
+        db.commit()
+
+        log_activity(
+            db=db,
+            user=current_user,
+            activity=f"Dataset Uploaded - {len(df)} records uploaded"
         )
 
-    return upload_dataset_service(file, db, current_user.id)
+        return {
+            "success": True,
+            "message": f"Dataset uploaded successfully. {len(df)} records added."
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Dataset upload failed: {str(e)}"
+        )
 
 
 @router.get("/")
 def get_datasets(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    product: str | None = None,
-    category: str | None = None,
-    region: str | None = None,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    query = db.query(SalesData).filter(
+    records = db.query(SalesData).filter(
         SalesData.uploaded_by == current_user.id
-    )
-
-    if product:
-        query = query.filter(SalesData.product_name.ilike(f"%{product}%"))
-
-    if category:
-        query = query.filter(SalesData.category.ilike(f"%{category}%"))
-
-    if region:
-        query = query.filter(SalesData.region.ilike(f"%{region}%"))
-
-    total = query.count()
-
-    data = query.offset((page - 1) * limit).limit(limit).all()
-
-    return {
-        "success": True,
-        "message": "Datasets fetched successfully",
-        "page": page,
-        "limit": limit,
-        "total": total,
-        "total_pages": (total + limit - 1) // limit,
-        "data": data
-    }
-
-
-@router.get("/search")
-def search_datasets(
-    keyword: str = Query(...),
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    data = db.query(SalesData).filter(
-        SalesData.uploaded_by == current_user.id,
-        SalesData.product_name.ilike(f"%{keyword}%")
     ).all()
 
+    return [
+        {
+            "id": item.id,
+            "date": str(item.date),
+            "product_name": item.product_name,
+            "category": item.category,
+            "region": item.region,
+            "quantity_sold": item.quantity_sold,
+            "sales_amount": item.sales_amount
+        }
+        for item in records
+    ]
+
+
+@router.delete("/{dataset_id}")
+def delete_dataset(
+    dataset_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    record = db.query(SalesData).filter(
+        SalesData.id == dataset_id,
+        SalesData.uploaded_by == current_user.id
+    ).first()
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset record not found"
+        )
+
+    db.delete(record)
+    db.commit()
+
     return {
         "success": True,
-        "message": "Search completed",
-        "data": data
+        "message": "Dataset deleted successfully"
     }
