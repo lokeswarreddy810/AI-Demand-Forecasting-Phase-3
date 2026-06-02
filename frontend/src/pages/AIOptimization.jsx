@@ -23,12 +23,12 @@ function AIOptimization() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold text-[#123f1f] mb-8">
+      <h1 className="text-4xl font-bold text-[#123f1f] dark:text-white mb-8">
         AI Optimization
       </h1>
 
-      <div className="bg-white border border-green-200 rounded-2xl shadow-md p-6 mb-8">
-        <h2 className="text-2xl font-bold text-[#123f1f] mb-5">
+      <div className="bg-white dark:bg-[#1e1e1e] border border-green-200 dark:border-gray-700 rounded-2xl shadow-md p-6 mb-8">
+        <h2 className="text-2xl font-bold text-[#123f1f] dark:text-white mb-5">
           Model Retraining
         </h2>
 
@@ -40,17 +40,25 @@ function AIOptimization() {
         </button>
 
         {retrainResult && (
-          <div className="mt-5 bg-[#f7fff0] border border-green-200 rounded-xl p-4">
-            <p>{retrainResult.message}</p>
-            <p>Best Model: {retrainResult.best_model}</p>
-            <p>Score: {retrainResult.score}</p>
+          <div className="mt-5 bg-[#f7fff0] dark:bg-[#2a2a2a] border border-green-200 dark:border-gray-700 rounded-xl p-4">
+            <p className="text-gray-800 dark:text-gray-200">
+              {retrainResult.message}
+            </p>
+
+            <p className="text-gray-800 dark:text-gray-200">
+              Best Model: {retrainResult.best_model}
+            </p>
+
+            <p className="text-gray-800 dark:text-gray-200">
+              Score: {retrainResult.score}
+            </p>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <div className="bg-white border border-green-200 rounded-2xl shadow-md p-6">
-          <h2 className="text-2xl font-bold text-[#123f1f] mb-5">
+        <div className="bg-white dark:bg-[#1e1e1e] border border-green-200 dark:border-gray-700 rounded-2xl shadow-md p-6">
+          <h2 className="text-2xl font-bold text-[#123f1f] dark:text-white mb-5">
             Anomaly Detection
           </h2>
 
@@ -62,18 +70,24 @@ function AIOptimization() {
           </button>
 
           {anomalies.length === 0 ? (
-            <p className="text-gray-500">No anomalies found</p>
+            <p className="text-gray-500 dark:text-gray-300">
+              No anomalies found
+            </p>
           ) : (
             anomalies.map((item, index) => (
-              <div key={index} className="border-b py-3">
-                {item.product_name} - {item.quantity_sold} - {item.anomaly_type}
+              <div
+                key={index}
+                className="border-b border-gray-100 dark:border-gray-700 py-3 text-gray-800 dark:text-gray-200"
+              >
+                {item.product_name} - {item.quantity_sold} -{" "}
+                {item.anomaly_type}
               </div>
             ))
           )}
         </div>
 
-        <div className="bg-white border border-green-200 rounded-2xl shadow-md p-6">
-          <h2 className="text-2xl font-bold text-[#123f1f] mb-5">
+        <div className="bg-white dark:bg-[#1e1e1e] border border-green-200 dark:border-gray-700 rounded-2xl shadow-md p-6">
+          <h2 className="text-2xl font-bold text-[#123f1f] dark:text-white mb-5">
             Seasonal Trend Detection
           </h2>
 
@@ -85,11 +99,17 @@ function AIOptimization() {
           </button>
 
           {seasonalTrends.length === 0 ? (
-            <p className="text-gray-500">No seasonal trends found</p>
+            <p className="text-gray-500 dark:text-gray-300">
+              No seasonal trends found
+            </p>
           ) : (
             seasonalTrends.map((item, index) => (
-              <div key={index} className="border-b py-3">
-                {item.month} - ₹ {item.total_sales} - Qty {item.total_quantity}
+              <div
+                key={index}
+                className="border-b border-gray-100 dark:border-gray-700 py-3 text-gray-800 dark:text-gray-200"
+              >
+                {item.month} - ₹ {item.total_sales} - Qty{" "}
+                {item.total_quantity}
               </div>
             ))
           )}

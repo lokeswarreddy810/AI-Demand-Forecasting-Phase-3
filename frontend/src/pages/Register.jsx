@@ -23,70 +23,93 @@ function Register() {
 
       alert("Registration successful");
       navigate("/");
-   } catch (error) 
-   {
-  console.log(error.response?.data);
-  alert(error.response?.data?.detail || "Registration failed");
-   }
+    } catch (error) {
+      console.log(error.response?.data);
+      alert(error.response?.data?.detail || "Registration failed");
+    }
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-white via-[#f4fff0] to-[#caff9b]">
-      <div className="w-1/2 flex flex-col justify-center px-20">
-        <h1 className="text-6xl font-bold mb-6 text-[#123f1f]">
+    <div className="min-h-screen flex bg-gray-100 dark:bg-[#111111] text-[#123f1f] dark:text-white">
+      <div className="hidden lg:flex w-1/2 flex-col justify-center px-20 bg-[#f5fff0] dark:bg-[#0b0b0b]">
+        <h1 className="text-6xl font-bold mb-6 text-[#123f1f] dark:text-[#9dff00]">
           AI Forecast
         </h1>
 
-        <p className="text-lg mb-10 text-gray-700">
+        <p className="text-xl text-gray-700 dark:text-gray-300 mb-10">
           Create your account and unlock powerful AI-driven business forecasting.
         </p>
 
-        <div className="space-y-5 text-lg text-[#123f1f] font-semibold">
-          <p>📈 Intelligent analytics platform</p>
-          <p>🤖 Machine learning forecasting</p>
-          <p>🛡 Secure and scalable architecture</p>
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-[#1e1e1e] border border-green-300 dark:border-gray-700 p-4 rounded-xl text-gray-800 dark:text-gray-200">
+            📈 Intelligent Analytics Platform
+          </div>
+
+          <div className="bg-white dark:bg-[#1e1e1e] border border-green-300 dark:border-gray-700 p-4 rounded-xl text-gray-800 dark:text-gray-200">
+            🤖 Machine Learning Forecasting
+          </div>
+
+          <div className="bg-white dark:bg-[#1e1e1e] border border-green-300 dark:border-gray-700 p-4 rounded-xl text-gray-800 dark:text-gray-200">
+            🛡 Secure & Scalable Architecture
+          </div>
         </div>
       </div>
 
-      <div className="w-1/2 flex justify-center items-center">
+      <div className="w-full lg:w-1/2 flex justify-center items-center px-6">
         <form
           onSubmit={registerUser}
-          className="bg-white border border-green-200 p-10 rounded-3xl shadow-2xl w-96"
+          className="bg-white dark:bg-[#1e1e1e] border border-green-300 dark:border-gray-700 p-10 rounded-3xl shadow-2xl w-full max-w-md"
         >
-          <h2 className="text-3xl font-bold mb-2 text-[#123f1f]">
+          <h2 className="text-3xl font-bold mb-2 text-[#123f1f] dark:text-white">
             Create Account
           </h2>
 
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-600 dark:text-gray-300 mb-8">
             Start using AI forecasting today
           </p>
 
           <input
-            className="w-full border border-green-300 p-3 rounded-xl mb-5"
-            placeholder="Enter full name"
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white border border-green-300 dark:border-gray-700 p-3 rounded-xl mb-5 outline-none"
+            placeholder="Enter Full Name"
+            value={form.name}
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value })
+            }
           />
 
           <input
-            className="w-full border border-green-300 p-3 rounded-xl mb-5"
-            placeholder="Enter email"
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white border border-green-300 dark:border-gray-700 p-3 rounded-xl mb-5 outline-none"
+            placeholder="Enter Email"
+            type="email"
+            value={form.email}
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
           />
 
           <input
-            className="w-full border border-green-300 p-3 rounded-xl mb-6"
+            className="w-full bg-white dark:bg-[#2a2a2a] text-black dark:text-white border border-green-300 dark:border-gray-700 p-3 rounded-xl mb-6 outline-none"
             type="password"
-            placeholder="Enter password"
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            placeholder="Enter Password"
+            value={form.password}
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
           />
 
-          <button className="w-full bg-[#8ee000] text-[#123f1f] p-3 rounded-xl font-bold">
+          <button
+            type="submit"
+            className="w-full bg-[#9dff00] hover:bg-[#8ee600] text-[#032b11] p-3 rounded-xl font-bold transition-all"
+          >
             Register
           </button>
 
-          <p className="text-center mt-6 text-gray-500">
+          <p className="text-center mt-6 text-gray-600 dark:text-gray-300">
             Already have an account?{" "}
-            <Link to="/" className="text-[#39a000] font-bold">
+            <Link
+              to="/"
+              className="text-[#123f1f] dark:text-[#9dff00] font-bold hover:underline"
+            >
               Login
             </Link>
           </p>

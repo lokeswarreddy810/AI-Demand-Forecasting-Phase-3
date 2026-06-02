@@ -8,6 +8,13 @@ import {
   ShieldCheck,
   Activity,
   LogOut,
+  Bell,
+  Users,
+  User,
+  Workflow,
+  Link,
+  BarChart3,
+  PanelsTopLeft,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -61,6 +68,42 @@ function Sidebar() {
       path: "/monitoring",
       icon: <Activity size={20} />,
     },
+
+    {
+      name: "Automation",
+      path: "/automation",
+      icon: <Workflow size={20} />,
+    },
+    {
+      name: "Integrations",
+      path: "/integrations",
+      icon: <Link size={20} />,
+    },
+    {
+      name: "AI Recommendations",
+      path: "/ai-recommendations",
+      icon: <Brain size={20} />,
+    },
+    {
+      name: "Forecast Comparison",
+      path: "/forecast-comparison",
+      icon: <BarChart3 size={20} />,
+    },
+    {
+      name: "Alerts",
+      path: "/alerts",
+      icon: <Bell size={20} />,
+    },
+    {
+      name: "Dashboard Settings",
+      path: "/dashboard-settings",
+      icon: <PanelsTopLeft size={20} />,
+    },
+    {
+      name: "User Management",
+      path: "/user-management",
+      icon: <Users size={20} />,
+    },
   ];
 
   return (
@@ -74,48 +117,45 @@ function Sidebar() {
           </h1>
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 px-4">
+        <div className="mt-8 px-4 overflow-y-auto h-[calc(100vh-180px)]">
 
-          {menuItems.map((item) => (
+          <div className="flex flex-col gap-3">
 
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 font-medium
-                ${
-                  isActive
-                    ? "bg-[#9dff00] text-[#032b11] shadow-lg"
-                    : "hover:bg-[#0d4420] text-white"
-                }`
-              }
-            >
+            {menuItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 font-medium
+                  ${
+                    isActive
+                      ? "bg-[#9dff00] text-[#032b11] shadow-lg"
+                      : "hover:bg-[#0d4420] text-white"
+                  }`
+                }
+              >
+                {item.icon}
 
-              {item.icon}
+                <span className="text-lg">
+                  {item.name}
+                </span>
+              </NavLink>
+            ))}
 
-              <span className="text-lg">
-                {item.name}
-              </span>
-
-            </NavLink>
-
-          ))}
+          </div>
 
         </div>
 
       </div>
 
-      <div className="p-4">
+      <div className="p-4 border-t border-green-900">
 
         <button
           onClick={logout}
           className="w-full bg-[#9dff00] hover:bg-[#b7ff39] text-[#032b11] font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-200"
         >
-
           <LogOut size={20} />
-
           Logout
-
         </button>
 
       </div>

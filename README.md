@@ -1,347 +1,447 @@
-# Advanced AI Demand Forecasting System
+# 🚀 Advanced AI Demand Forecasting System
 
-## 📌 Project Description
+## 📌 Project Overview
 
-The **Advanced AI Demand Forecasting System** is a full-stack AI-powered business analytics application designed to help organizations analyze sales data, forecast future demand, optimize inventory management, and generate intelligent business insights using Machine Learning models.
+The Advanced AI Demand Forecasting System is a full-stack enterprise application designed to predict future product demand using Machine Learning models and provide actionable business insights through dashboards, analytics, automation, notifications, and enterprise integrations.
 
-This project was developed using **FastAPI** for the backend, **React.js** for the frontend, **MySQL** for database management, and multiple Machine Learning algorithms such as **Linear Regression**, **Random Forest**, and **Gradient Boosting** for accurate demand forecasting and revenue prediction.
-
-The system allows users to upload sales datasets in CSV or Excel format, process the data, visualize analytics through interactive dashboards, generate AI-based forecasting reports, monitor activities, and manage business operations efficiently.
+The platform helps businesses improve inventory planning, reduce stock shortages, minimize overstock situations, automate forecasting workflows, and make data-driven decisions.
 
 ---
 
-# 🚀 Key Features
+# 🎯 Objectives
+
+* Predict future product demand accurately
+* Optimize inventory management
+* Improve business planning and decision-making
+* Reduce stock shortages and excess inventory
+* Automate forecasting and reporting processes
+* Provide real-time business analytics
+* Support enterprise-level integrations
+
+---
+
+# ✨ Key Features
 
 ## 🔐 Authentication & Security
-- User Registration & Login
-- JWT Token-Based Authentication
-- Protected APIs & Secure Access
+
+* User Registration
+* User Login
+* JWT Authentication
+* Protected APIs
+* Role-Based Access Control
+* Password Reset
+* Profile Management
+* API Rate Limiting
+* Audit Logging
+
+---
 
 ## 📂 Dataset Management
-- Upload CSV/Excel Sales Datasets
-- Dataset Validation
-- Store Datasets in MySQL Database
-- Dataset Listing & Management
 
-## 📊 Dashboard Analytics
-- Total Sales Analytics
-- Monthly Sales Trends
-- Top Product Analysis
-- Region-wise Sales Analytics
-- Category-wise Sales Analytics
-- Forecast Accuracy Metrics
-- Revenue Prediction Analytics
-- Inventory Risk Analysis
+* CSV Dataset Upload
+* Excel Dataset Upload
+* Dataset Validation
+* Missing Data Detection
+* Duplicate Data Handling
+* File Type Validation
+* File Size Validation
+* Dataset History
 
-## 🤖 AI Demand Forecasting
-- Demand Prediction using Machine Learning
-- Multiple Forecasting Models:
-  - Linear Regression
-  - Random Forest
-  - Gradient Boosting
-- Seasonal Sales Prediction
-- Forecast Revenue Calculation
-- Inventory Recommendations
+### Required Dataset Columns
 
-## 📑 Reports Module
-- AI Business Insights
-- Forecast Reports
-- Revenue Reports
-- Forecast Comparison Reports
-- Downloadable Analytics Reports
-
-## 👨‍💼 Admin Dashboard
-- User Monitoring
-- Dataset Monitoring
-- Forecast Monitoring
-- Activity Tracking
-- Centralized System Management
-
-## 📈 Monitoring System
-- Dataset Upload Logs
-- Forecast Activity Logs
-- User Activity Monitoring
-- System Tracking
-
-## 🌙 Frontend Features
-- Responsive UI Design
-- Dark Mode Support
-- Interactive Charts & Graphs
-- Global Search Functionality
-- Scrollable Data Tables
-- Real-Time Dashboard Updates
+| Column        |
+| ------------- |
+| date          |
+| product_name  |
+| category      |
+| region        |
+| quantity_sold |
+| sales_amount  |
 
 ---
 
-# 🛠️ Technologies Used
+## 🤖 AI Forecasting Module
+
+### Machine Learning Models
+
+* Linear Regression
+* Random Forest Regressor
+* Gradient Boosting Regressor
+
+### Forecasting Features
+
+* Future Demand Prediction
+* Revenue Prediction
+* Seasonal Trend Analysis
+* Inventory Recommendations
+* Demand Spike Detection
+* Low Stock Prediction
+* Forecast Confidence Score
+
+---
+
+## 📊 Forecast Comparison & Insights
+
+* Multi-Model Forecast Comparison
+* Historical Forecast Analysis
+* Forecast Accuracy Tracking
+* Model Performance Dashboard
+* Confidence Score Visualization
+* Business Recommendations
+
+---
+
+## 📈 Dashboard Analytics
+
+### KPI Cards
+
+* Total Sales
+* Total Revenue
+* Total Products
+* Forecast Accuracy
+* Active Alerts
+
+### Charts & Visualizations
+
+* Monthly Sales Trends
+* Revenue Analytics
+* Forecast Trends
+* Category Sales Analysis
+* Region Sales Analysis
+* Inventory Risk Analysis
+* Seasonal Forecast Trends
+
+### Dashboard Features
+
+* Responsive Design
+* Global Search
+* Dashboard Widgets
+* Custom Dashboard Settings
+* Real-Time Updates
+
+---
+
+## ⚙️ Smart Automation Module
+
+* Automated Forecast Scheduling
+* Automated Dataset Processing
+* Recurring Forecast Generation
+* Automated Alert Generation
+* Configurable Forecast Intervals
+
+---
+
+## 🔗 Enterprise Integration Module
+
+* Inventory System Integration
+* ERP Integration Support
+* External API Integrations
+* Webhook Management
+* Integration Configuration
+* Third-Party Service Connections
+
+---
+
+## 🔔 Notifications & Alerts
+
+### Alert Types
+
+* Dataset Upload Notifications
+* Forecast Completion Notifications
+* Forecast Failure Alerts
+* Report Completion Alerts
+* Threshold-Based Alerts
+
+### Features
+
+* Real-Time Notification Bell
+* Notification Counter
+* Alert History
+* Notification Preferences
+* Email Notifications
+
+---
+
+## 👤 User Management
+
+* User Profiles
+* Activity Tracking
+* Account Status Management
+* Profile Updates
+* Password Management
+* User Activity Logs
+
+---
+
+## 🧠 AI Recommendation Engine
+
+* Inventory Optimization Suggestions
+* Demand Trend Insights
+* Product Performance Recommendations
+* Business Growth Recommendations
+
+---
+
+## 📄 Reports Module
+
+* Forecast Reports
+* Business Reports
+* Analytics Reports
+* PDF Export
+* Excel Export
+* Downloadable Summaries
+
+---
+
+## 📡 Monitoring & Administration
+
+* Application Monitoring
+* User Activity Monitoring
+* Audit Logs
+* System Health Monitoring
+* Administrative Controls
+
+---
+
+# 🛠 Technology Stack
 
 ## Backend
-- FastAPI
-- Python
-- SQLAlchemy ORM
-- Pydantic
-- JWT Authentication
-- Pandas
-- Scikit-learn
-- MySQL
+
+* FastAPI
+* Python 3.11
+* SQLAlchemy
+* SQLite / MySQL
+* Pandas
+* NumPy
+* Scikit-Learn
+* APScheduler
+* SlowAPI
+* JWT Authentication
+* Pydantic
 
 ## Frontend
-- React.js
-- Tailwind CSS
-- Axios
-- Recharts
 
-## Machine Learning Models
-- Linear Regression
-- Random Forest
-- Gradient Boosting
+* React.js
+* Vite
+* Tailwind CSS
+* Axios
+* Recharts
+* Lucide React
 
----
+## Database
 
-# 🤖 Machine Learning Models Used
+* SQLite (Development)
+* MySQL (Production)
 
-## Linear Regression
-Used for simple trend forecasting based on historical sales patterns.
+## Machine Learning
 
-## Random Forest
-Used for accurate and stable forecasting using multiple decision trees.
-
-## Gradient Boosting
-Used for advanced AI forecasting by improving previous prediction errors step-by-step.
+* Linear Regression
+* Random Forest
+* Gradient Boosting
 
 ---
 
-# 📌 Project Workflow
+# 📂 Project Structure
+
+## Backend Structure
 
 ```text
-User Login/Register
+Backend/
+│
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── endpoints/
+│   │
+│   ├── core/
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   ├── utils/
+│   ├── background/
+│   ├── main.py
+│   └── database.py
+│
+└── requirements.txt
+```
+
+## Frontend Structure
+
+```text
+Frontend/
+│
+├── src/
+│   ├── api/
+│   ├── components/
+│   ├── context/
+│   ├── layouts/
+│   ├── pages/
+│   ├── services/
+│   ├── utils/
+│   │
+│   ├── App.jsx
+│   └── main.jsx
+│
+├── package.json
+└── vite.config.js
+```
+
+---
+
+# 🔄 Application Workflow
+
+```text
+User Registration
         ↓
-Upload Dataset
+User Login
         ↓
-Dataset Validation & Storage
+Dataset Upload
         ↓
-Analytics Processing
+Dataset Validation
         ↓
-AI Forecast Generation
+Data Storage
         ↓
-Revenue Prediction
+Forecast Generation
         ↓
-Inventory Risk Analysis
+Machine Learning Models
+        ↓
+Predictions & Analytics
+        ↓
+Notifications & Alerts
         ↓
 Dashboard Visualization
         ↓
-Reports & Monitoring
+Forecast Comparison
+        ↓
+Business Recommendations
+        ↓
+Reports Export
+```
 
+---
 
+# 📚 API Modules
 
-## Project Structure
+## Authentication
 
-```txt
-Task5/
-│
-├── Backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── endpoints/
-│   │   │       │   ├── auth.py
-│   │   │       │   ├── users.py
-│   │   │       │   ├── datasets.py
-│   │   │       │   ├── forecasting.py
-│   │   │       │   ├── analytics.py
-│   │   │       │   └── reports.py
-│   │   │       └── router.py
-│   │   │
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   ├── database.py
-│   │   │   ├── security.py
-│   │   │   └── dependencies.py
-│   │   │
-│   │   ├── models/
-│   │   │   ├── user.py
-│   │   │   ├── dataset.py
-│   │   │   ├── forecast.py
-│   │   │   └── report.py
-│   │   │
-│   │   ├── schemas/
-│   │   │   ├── auth.py
-│   │   │   ├── user.py
-│   │   │   ├── dataset.py
-│   │   │   ├── forecast.py
-│   │   │   └── report.py
-│   │   │
-│   │   ├── services/
-│   │   │   ├── auth_service.py
-│   │   │   ├── dataset_service.py
-│   │   │   ├── forecasting_service.py
-│   │   │   ├── analytics_service.py
-│   │   │   └── report_service.py
-│   │   │
-│   │   ├── ml/
-│   │   │   ├── preprocessing.py
-│   │   │   ├── train_model.py
-│   │   │   └── predict.py
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── csv_handler.py
-│   │   │   ├── excel_handler.py
-│   │   │   ├── pdf_generator.py
-│   │   │   └── validators.py
-│   │   │
-│   │   └── main.py
-│   │
-│   ├── requirements.txt
-│   └── .env
-│
-└── frontend/
-    ├── src/
-    │   ├── api/
-    │   │   └── axiosConfig.js
-    │   │
-    │   ├── components/
-    │   │   ├── Layout.jsx
-    │   │   ├── Sidebar.jsx
-    │   │   ├── Navbar.jsx
-    │   │   ├── ProtectedRoute.jsx
-    │   │   ├── StatCard.jsx
-    │   │   └── charts/
-    │   │       ├── SalesTrendChart.jsx
-    │   │       ├── TopProductsChart.jsx
-    │   │       └── ForecastChart.jsx
-    │   │
-    │   ├── pages/
-    │   │   ├── Login.jsx
-    │   │   ├── Register.jsx
-    │   │   ├── Dashboard.jsx
-    │   │   ├── Upload.jsx
-    │   │   ├── Forecast.jsx
-    │   │   └── Reports.jsx
-    │   │
-    │   ├── App.jsx
-    │   ├── main.jsx
-    │   └── index.css
-    │
-    ├── package.json
-    ├── vite.config.js
-    ├── tailwind.config.js
-    └── postcss.config.js
-Database Setup
+* Register User
+* Login User
+* Get Current User
 
-Create a MySQL database:
+## Dataset
 
-CREATE DATABASE ai_demand_db;
+* Upload Dataset
+* Get Datasets
+* Dataset History
 
-Tables are automatically created by SQLAlchemy when the backend starts.
+## Forecasting
 
-Backend Setup
+* Generate Forecast
+* Forecast History
+* Forecast Details
 
-Go to backend folder:
+## Analytics
+
+* Dashboard Summary
+* Sales Analytics
+* Revenue Analytics
+* Region Analytics
+* Category Analytics
+
+## Alerts
+
+* Create Alert
+* Get Alerts
+* Mark Alert as Read
+
+## Automation
+
+* Schedule Forecast
+* Manage Jobs
+
+## Integrations
+
+* Create Integration
+* Get Integrations
+* Webhook Management
+
+## User Management
+
+* Profile Management
+* Activity Tracking
+* Account Status Management
+
+---
+
+# ⚡ Installation
+
+## Backend Setup
+
+```bash
+git clone https://github.com/lokeswarreddy810/Advanced_AI_Demand_Forecasting_Project.git
 
 cd Backend
 
-Create virtual environment:
-
 python -m venv venv
-
-Activate virtual environment:
 
 venv\Scripts\activate
 
-Install dependencies:
-
 pip install -r requirements.txt
-Backend .env File
 
-Create .env inside the Backend folder:
+python -m uvicorn app.main:app --reload
+```
 
-DATABASE_URL=mysql+pymysql://root:your_mysql_password@localhost/ai_demand_db
-JWT_SECRET=advanced_ai_secret_key
-JWT_ALGORITHM=HS256
+### Backend URL
 
-Replace your_mysql_password with your actual MySQL password.
+```text
+http://127.0.0.1:8000
+```
 
-Backend Requirements
-fastapi
-uvicorn
-sqlalchemy
-pymysql
-pandas
-numpy
-scikit-learn
-python-dotenv
-python-multipart
-passlib[bcrypt]==1.7.4
-bcrypt==4.0.1
-python-jose
-openpyxl
-reportlab
-pydantic[email]
+### Swagger API Documentation
 
+```text
+http://127.0.0.1:8000/docs
+```
 
-📂 Backend Modules
-Authentication Module
-Dataset Upload Module
-Forecasting Module
-Analytics Module
-Reports Module
-Monitoring Module
-Admin Module
-AI Optimization Module
+---
 
-📂 Frontend Modules
-Dashboard
-Datasets
-Upload Dataset
-Forecast
-Reports
-AI Optimization
-Admin Dashboard
-Monitoring
-Notifications
+## Frontend Setup
 
-📌 Database Tables
-users
-sales_data
-forecast_results
-activity_logs
-📈 Analytics Included
-Monthly Sales Trends
-Top Product Analysis
-Category-wise Sales Analytics
-Region-wise Sales Analytics
-Revenue Prediction Analytics
-Inventory Risk Analysis
-Forecast Accuracy Analysis
+```bash
+cd Frontend
 
-📌 Future Enhancements
-Deep Learning Forecasting Models
-Real-Time Forecasting
-Cloud Deployment
-Redis Caching
-Automated Report Scheduling
-Live Notifications
-Advanced Business Intelligence
-Role-Based Access Control
+npm install
 
+npm run dev
+```
 
-📚 Learning Outcomes
+### Frontend URL
 
-This project helped in learning:
+```text
+http://localhost:5173
+```
 
-Full Stack Development
-FastAPI Backend Development
-React Frontend Development
-JWT Authentication
-Machine Learning Integration
-AI Forecasting Techniques
-Dashboard Analytics
-Database Management
-API Integration
-Error Handling
-Monitoring Systems
+---
 
+# 🧪 Sample Test Dataset Format
 
-📌 Conclusion
+| date       | product_name | category    | region | quantity_sold | sales_amount |
+| ---------- | ------------ | ----------- | ------ | ------------- | ------------ |
+| 2024-01-01 | Laptop       | Electronics | North  | 25            | 1300000      |
+| 2024-01-02 | Mobile       | Electronics | South  | 40            | 1120000      |
 
-The Advanced AI Demand Forecasting System is a scalable AI-powered analytics platform that helps businesses perform demand forecasting, inventory optimization, sales analysis, revenue prediction, and intelligent decision-making through a modern full-stack web application.
+---
+
+# 🚀 Future Enhancements
+
+* Redis Caching
+* Celery Background Jobs
+* Docker Containerization
+* Kubernetes Deployment
+* AWS Cloud Deployment
+* CI/CD Pipeline
+* WebSocket Notifications
+* SMS Notifications
+* Advanced Deep Learning Models
+* Real-Time Forecast Streaming
+

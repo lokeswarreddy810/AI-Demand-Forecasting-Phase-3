@@ -1,30 +1,53 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    UploadFile,
+    File,
+    HTTPException,
+    Request
+)
 from sqlalchemy.orm import Session
 import pandas as pd
+import io
 
+from app.utils.rate_limiter import limiter
+from app.models.alert import Alert
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.dataset import SalesData
-from app.utils.activity_logger import log_activity
+from app.utils.file_validator import (
+    validate_upload_file,
+    validate_file_size
+)
+from app.services.audit_service import create_audit_log
 
 router = APIRouter()
 
 
 @router.post("/upload")
+@limiter.limit("10/minute")
 def upload_dataset(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
     try:
+        validate_upload_file(file)
+
+        file_content = file.file.read()
+        validate_file_size(file_content)
+
         if file.filename.endswith(".csv"):
-            df = pd.read_csv(file.file)
+            df = pd.read_csv(io.BytesIO(file_content))
+
         elif file.filename.endswith((".xlsx", ".xls")):
-            df = pd.read_excel(file.file)
+            df = pd.read_excel(io.BytesIO(file_content))
+
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Only CSV or Excel files are allowed"
+                detail="Unsupported file type"
             )
 
         required_columns = [
@@ -58,10 +81,21 @@ def upload_dataset(
 
         db.commit()
 
-        log_activity(
+        alert = Alert(
+            alert_type="Dataset Upload",
+            message=f"Dataset uploaded successfully with {len(df)} records",
+            threshold_value=0,
+            is_read=False
+        )
+
+        db.add(alert)
+        db.commit()
+
+        create_audit_log(
             db=db,
-            user=current_user,
-            activity=f"Dataset Uploaded - {len(df)} records uploaded"
+            admin_user=getattr(current_user, "email", "User"),
+            action=f"Uploaded dataset with {len(df)} records",
+            module="Datasets"
         )
 
         return {
@@ -69,8 +103,13 @@ def upload_dataset(
             "message": f"Dataset uploaded successfully. {len(df)} records added."
         }
 
+    except HTTPException:
+        db.rollback()
+        raise
+
     except Exception as e:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail=f"Dataset upload failed: {str(e)}"
@@ -100,27 +139,48 @@ def get_datasets(
     ]
 
 
-@router.delete("/{dataset_id}")
-def delete_dataset(
-    dataset_id: int,
+@router.get("/database")
+def get_database(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    record = db.query(SalesData).filter(
-        SalesData.id == dataset_id,
+    records = db.query(SalesData).filter(
         SalesData.uploaded_by == current_user.id
-    ).first()
+    ).all()
 
-    if not record:
-        raise HTTPException(
-            status_code=404,
-            detail="Dataset record not found"
-        )
+    return {
+        "total_records": len(records),
+        "data": [
+            {
+                "id": item.id,
+                "date": str(item.date),
+                "product_name": item.product_name,
+                "category": item.category,
+                "region": item.region,
+                "quantity_sold": item.quantity_sold,
+                "sales_amount": item.sales_amount
+            }
+            for item in records
+        ]
+    }
 
-    db.delete(record)
+
+@router.delete("/database")
+def delete_database(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    deleted_count = db.query(SalesData).filter(
+        SalesData.uploaded_by == current_user.id
+    ).count()
+
+    db.query(SalesData).filter(
+        SalesData.uploaded_by == current_user.id
+    ).delete()
+
     db.commit()
 
     return {
-        "success": True,
-        "message": "Dataset deleted successfully"
+        "message": "Database records deleted successfully",
+        "deleted_records": deleted_count
     }

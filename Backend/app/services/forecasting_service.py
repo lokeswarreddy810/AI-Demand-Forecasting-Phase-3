@@ -2,6 +2,7 @@ from datetime import timedelta
 from sqlalchemy import func
 
 from app.models.dataset import SalesData
+from app.models.forecast_history import ForecastHistory
 
 
 def get_inventory_recommendation(qty):
@@ -20,7 +21,9 @@ def generate_forecast_service(
     days,
     selected_model="linear_regression"
 ):
-    sales = db.query(SalesData).all()
+    sales = db.query(SalesData).filter(
+        SalesData.uploaded_by == user_id
+    ).all()
 
     if not sales:
         return {
@@ -33,6 +36,8 @@ def generate_forecast_service(
         SalesData.product_name,
         func.avg(SalesData.quantity_sold),
         func.avg(SalesData.sales_amount)
+    ).filter(
+        SalesData.uploaded_by == user_id
     ).group_by(
         SalesData.product_name
     ).all()
@@ -68,21 +73,36 @@ def generate_forecast_service(
 
             predicted_qty = round(predicted_qty, 2)
             predicted_revenue = round(predicted_qty * avg_price, 2)
+            forecast_date = str(last_date + timedelta(days=i))
+            model_used = model_names.get(selected_model, "Linear Regression")
+            recommendation = get_inventory_recommendation(predicted_qty)
 
-            forecast.append({
+            forecast_item = {
                 "product_name": product,
-                "forecast_date": str(last_date + timedelta(days=i)),
+                "forecast_date": forecast_date,
                 "predicted_quantity": predicted_qty,
                 "predicted_revenue": predicted_revenue,
                 "accuracy": accuracy,
-                "model_used": model_names.get(
-                    selected_model,
-                    "Linear Regression"
-                ),
-                "inventory_recommendation": get_inventory_recommendation(
-                    predicted_qty
-                )
-            })
+                "model_used": model_used,
+                "inventory_recommendation": recommendation
+            }
+
+            forecast.append(forecast_item)
+
+            db_record = ForecastHistory(
+                user_id=user_id,
+                product_name=product,
+                forecast_date=forecast_date,
+                predicted_quantity=predicted_qty,
+                predicted_revenue=predicted_revenue,
+                accuracy=accuracy,
+                model_used=model_used,
+                inventory_recommendation=recommendation
+            )
+
+            db.add(db_record)
+
+    db.commit()
 
     seasonal_predictions = [
         {"month": "January", "predicted_sales": 120000},

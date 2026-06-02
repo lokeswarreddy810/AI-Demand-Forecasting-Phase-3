@@ -1,91 +1,152 @@
-import { Bell, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Moon, Sun, User } from "lucide-react";
 
-import API from "../api/axiosConfig";
+import NotificationBell from "./notifications/NotificationBell";
+import NotificationList from "./notifications/NotificationList";
+import GlobalSearch from "./GlobalSearch";
+import { getAlerts, markAlertRead } from "../services/notificationService";
 
-function Navbar({ darkMode, setDarkMode }) {
-  const [showNotifications, setShowNotifications] = useState(false);
+function Navbar() {
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const loadNotifications = async () => {
     try {
-      const response = await API.get("/monitoring/logs");
+      const data = await getAlerts();
+      const alertList = Array.isArray(data) ? data : [];
 
-      const latestLogs = (response.data || [])
-        .slice(0, 5)
-        .map((log) => ({
-          message: log.activity,
-          time: new Date(log.timestamp).toLocaleString(),
-        }));
+      setNotifications(alertList);
 
-      setNotifications(latestLogs);
+      const unread = alertList.filter((item) => !item.is_read).length;
+      setUnreadCount(unread);
     } catch (error) {
-      console.log("Notification Error:", error.response?.data || error.message);
+      console.log("Notification Error:", error);
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
   useEffect(() => {
     loadNotifications();
+
+    const interval = setInterval(() => {
+      loadNotifications();
+    }, 10000);
+
+    const handleNotificationUpdate = () => {
+      loadNotifications();
+    };
+
+    window.addEventListener("notification-updated", handleNotificationUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        "notification-updated",
+        handleNotificationUpdate
+      );
+    };
+  }, []);
+
+  const toggleNotifications = async () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+
+    if (nextOpen) {
+      const unreadAlerts = notifications.filter((item) => !item.is_read);
+
+      setUnreadCount(0);
+
+      try {
+        await Promise.all(unreadAlerts.map((item) => markAlertRead(item.id)));
+
+        setNotifications((prev) =>
+          prev.map((item) => ({
+            ...item,
+            is_read: true,
+          }))
+        );
+      } catch (error) {
+        console.log("Mark Read Error:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    let timer;
+
+    if (open) {
+      timer = setTimeout(() => {
+        setOpen(false);
+      }, 10000);
+    }
+
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  const toggleDarkMode = () => {
+    const root = document.documentElement;
+
+    if (darkMode) {
+      root.classList.remove("dark");
+      localStorage.setItem("darkMode", "false");
+    } else {
+      root.classList.add("dark");
+      localStorage.setItem("darkMode", "true");
+    }
+
+    setDarkMode(!darkMode);
+  };
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem("darkMode");
+
+    if (savedMode === "true") {
+      document.documentElement.classList.add("dark");
+      setDarkMode(true);
+    }
   }, []);
 
   return (
-    <div className="h-20 bg-white dark:bg-[#1e1e1e] border-b border-green-200 dark:border-gray-700 flex items-center justify-between px-8 shadow-sm sticky top-0 z-40">
-      <h1 className="text-2xl font-bold text-[#123f1f] dark:text-white">
-        Advanced AI Demand Forecasting
-      </h1>
+    <div className="bg-white dark:bg-[#1e1e1e] shadow-md px-8 py-4 flex justify-between items-center sticky top-0 z-40">
+      <GlobalSearch />
 
-      <div className="flex items-center gap-5 relative">
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <NotificationBell
+            count={unreadCount}
+            onClick={toggleNotifications}
+          />
+
+          {open && (
+            <div className="absolute right-0 mt-3 w-96 bg-white dark:bg-[#1e1e1e] shadow-xl rounded-xl p-4 border border-green-200 z-50">
+              <NotificationList notifications={notifications} />
+            </div>
+          )}
+        </div>
+
         <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="bg-[#f5fff0] dark:bg-[#2a2a2a] p-3 rounded-full"
+          onClick={toggleDarkMode}
+          className="p-3 rounded-full bg-[#f5fff0] dark:bg-[#2a2a2a]"
         >
           {darkMode ? (
-            <Sun className="text-yellow-400" size={22} />
+            <Sun size={20} className="text-yellow-400" />
           ) : (
-            <Moon className="text-[#123f1f]" size={22} />
+            <Moon size={20} className="text-[#123f1f]" />
           )}
         </button>
 
         <button
-          onClick={() => setShowNotifications(!showNotifications)}
-          className="relative bg-[#f5fff0] dark:bg-[#2a2a2a] p-3 rounded-full"
+          onClick={() => navigate("/profile")}
+          className="p-3 rounded-full bg-[#9dff00] hover:bg-[#b7ff39] transition"
         >
-          <Bell className="text-[#123f1f] dark:text-white" size={22} />
-
-          {notifications.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              {notifications.length}
-            </span>
-          )}
+          <User size={20} className="text-[#032b11]" />
         </button>
-
-        {showNotifications && (
-          <div className="absolute top-16 right-0 w-[350px] bg-white dark:bg-[#1e1e1e] border border-green-200 dark:border-gray-700 rounded-2xl shadow-xl p-5 z-50">
-            <h2 className="text-xl font-bold text-[#123f1f] dark:text-white mb-4">
-              Notifications
-            </h2>
-
-            <div className="max-h-[400px] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="text-gray-500 text-center py-6">
-                  No notifications available
-                </div>
-              ) : (
-                notifications.map((item, index) => (
-                  <div key={index} className="border-b border-gray-100 py-3">
-                    <p className="font-medium text-[#123f1f] dark:text-white">
-                      {item.message}
-                    </p>
-
-                    <p className="text-sm text-gray-500 mt-1">
-                      {item.time}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

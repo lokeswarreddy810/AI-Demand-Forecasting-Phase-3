@@ -1,15 +1,32 @@
 import { useEffect, useState } from "react";
 import API from "../api/axiosConfig";
+import PageLoader from "../components/loaders/PageLoader";
+import ReusableTable from "../components/tables/ReusableTable";
 
 function Monitoring() {
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const loadLogs = async () => {
     try {
+      setLoading(true);
+
       const response = await API.get("/monitoring/logs");
-      setLogs(response.data || []);
+
+      setLogs(
+        Array.isArray(response.data)
+          ? response.data
+          : []
+      );
     } catch (error) {
-      console.log("Monitoring Error:", error.response?.data || error.message);
+      console.log(
+        "Monitoring Error:",
+        error.response?.data || error.message
+      );
+
+      setLogs([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -17,48 +34,53 @@ function Monitoring() {
     loadLogs();
   }, []);
 
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  const tableRows = logs.map((log) => [
+    log.username || "Unknown",
+    log.activity || "Activity",
+    log.timestamp
+      ? new Date(log.timestamp).toLocaleString()
+      : "N/A",
+  ]);
+
   return (
     <div>
-      <h1 className="text-4xl font-bold text-[#123f1f] dark:text-white mb-8">
-        System Monitoring
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-[#123f1f] dark:text-white">
+          System Monitoring
+        </h1>
 
-      <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-2xl shadow-md border border-green-200">
-        <h2 className="text-3xl font-bold text-[#123f1f] dark:text-white mb-8">
-          Activity Logs
-        </h2>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">
+          Monitor user activities, system events, and audit logs.
+        </p>
+      </div>
 
-        <div className="overflow-x-auto max-h-[600px] overflow-y-auto rounded-xl border border-green-200">
-          <table className="w-full min-w-[900px]">
-            <thead className="sticky top-0 bg-white dark:bg-[#1e1e1e] z-10">
-              <tr className="border-b border-green-200 text-left">
-                <th className="py-4 px-4">User</th>
-                <th className="py-4 px-4">Activity</th>
-                <th className="py-4 px-4">Timestamp</th>
-              </tr>
-            </thead>
+      <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-2xl shadow-md border border-green-300 dark:border-gray-700">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+          <h2 className="text-3xl font-bold text-[#123f1f] dark:text-white">
+            Activity Logs
+          </h2>
 
-            <tbody>
-              {logs.length === 0 ? (
-                <tr>
-                  <td colSpan="3" className="text-center py-8 text-gray-500">
-                    No logs available
-                  </td>
-                </tr>
-              ) : (
-                logs.map((log) => (
-                  <tr key={log.id} className="border-b border-gray-100">
-                    <td className="py-4 px-4">{log.username}</td>
-                    <td className="py-4 px-4">{log.activity}</td>
-                    <td className="py-4 px-4">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <button
+            onClick={loadLogs}
+            className="bg-[#9dff00] hover:bg-[#8ee600] text-[#032b11] font-bold px-6 py-3 rounded-xl"
+          >
+            Refresh Logs
+          </button>
         </div>
+
+        <ReusableTable
+          headers={[
+            "User",
+            "Activity",
+            "Timestamp",
+          ]}
+          rows={tableRows}
+          emptyMessage="No logs available"
+        />
       </div>
     </div>
   );
